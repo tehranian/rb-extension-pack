@@ -37,7 +37,7 @@ class SignalHandlers(object):
             fields_changed = changedesc.fields_changed
 
         request_args = {
-            'review_request_id': review_request_id,
+            'review.url': review_request_id,
             'new': is_new,
             'fields_changed': fields_changed,
         }

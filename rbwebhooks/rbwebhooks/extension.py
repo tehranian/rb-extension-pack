@@ -4,10 +4,9 @@
 # within Review Board. An administrator may add "Target" URLs, at which
 # the extension will fire HTTP POST requests when the specified hook
 # event occurs.
-import json
 import logging
-import urllib2
-import urllib
+import requests
+import requests.exceptions
 
 from reviewboard.extensions.base import Extension
 
@@ -50,23 +49,20 @@ class RBWebHooksExtension(Extension):
         Send out a web request and retry on failure.
 
         Currently this is a blocking operation. devising a way to send
-        these requests without blocking would be bennificial.
+        these requests without blocking would be beneficial.
         """
-        request = urllib2.Request(url)
-        arguments = urllib.urlencode({
-            'payload': self._encode_payload(request_payload),
-        })
-        # The addition of data automatically converts request to a POST.
-        request.add_data(arguments)
+
+        logging.debug("Web Hook URL: %s", url)
+        logging.debug("Web Hook Payload: %s", request_payload)
 
         while attempts:
             try:
-                return urllib2.urlopen(request)
-            except urllib2.URLError:
+                r = requests.post(url, data=request_payload)
+                logging.debug("Received response code: %s", r.status_code)
+                r.raise_for_status()
+                return r
+            except requests.exceptions.RequestException:
                 attempts -= 1
 
         logging.warning("Sending WebHook Request failed: %s " % url)
         return None
-
-    def _encode_payload(self, request_payload):
-        return json.dumps(request_payload)

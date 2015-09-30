@@ -15,4 +15,5 @@ setup(
         'reviewboard.extensions':
             '%s = rbwebhooks.extension:RBWebHooksExtension' % PACKAGE,
     },
+    install_requires=["requests==2.7.0",],
 )
